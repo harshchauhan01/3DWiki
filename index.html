@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Wikipedia - Beretta ARX160 Model</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=SUSE:wght@100..800&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2a2a2a, #3a3a3a);
+            color: white;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: rgba(0, 0, 0, 0.8);
+            position: fixed;
+            width: 100%;
+            z-index: 10;
+        }
+
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        header .title{
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        header nav a:hover {
+            color: #00aaff;
+        }
+
+        .model-section {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .model-section .heading{
+            padding-left: 100px;
+            padding-bottom: 300px;
+            font-size: 34px;
+            width: 100%;
+
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --progress-bar-color: #00aaff;
+            --poster-color: transparent;
+        }
+
+        /* Hotspot styling */
+        .hotspot {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00aaff;
+            cursor: pointer;
+            transform: translateZ(0);
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .hotspot:hover {
+            opacity: 1;
+        }
+
+        .hotspot-annotation {
+            display: none; /* Hidden by default since we'll show content in the panel */
+        }
+
+        /* Content Panel (LTA Research Style) */
+        .content-panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 20%);
+            color: white;
+            padding: 20px 40px;
+            z-index: 15;
+            box-sizing: border-box;
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        .content-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .content-panel-header .feature-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .content-panel-header .feature-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .content-panel-body {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .content-panel-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .content-panel-footer button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content-panel-footer .next-feature {
+            color: #ffcc00;
+        }
+
+        .content-panel-footer .next-feature::after {
+            content: '→';
+            font-size: 18px;
+        }
+
+        /* AR Button */
+        .ar-button {
+            /* position: fixed;
+            bottom: 600px;
+            right: 20px;*/
+            padding: 10px 20px;
+            margin-left: 30px;
+            background: #00aaff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 15;
+        }
+
+        .ar-button:hover {
+            background: #0099dd;
+        }
+
+        /* Gun Name Styling */
+        .gun-name {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 56px;
+            font-weight: bold;
+            color: #00aaff;
+            font-family: "Ubuntu", sans-serif;
+            font-optical-sizing: auto;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            z-index: 12;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .gun-name:hover {
+            transform: translateX(-50%) scale(1.1);
+            color: #ffcc00;
+        }
+
+
+        .overlay {
+            position: absolute;
+            top: 130px; /* Below header */
+            left: 50px;
+            /* transform: translateX(-50%); */
+            width: 350px;
+            text-align: center;
+            z-index: 10;
+            /* background: rgba(0, 0, 0, 0.6); */
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .overlay .title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00aaff;
+            font-family: "Ubuntu", sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .overlay .description {
+            text-align: left;
+            font-family: "Ubuntu", sans-serif;
+            font-size: 16px;
+            max-width: 600px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">3D Wikipedia</div>
+        <div class="title">BERETTA ARX160</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Models</a>
+            <a href="#">About</a>
+            <button class="ar-button" onclick="activateAR()">View in AR</button>
+        </nav>
+    </header>
+
+    <div class="overlay">
+        <div class="title">BERETTA ARX160</div>
+        <div class="description">
+            The Beretta ARX160 is a modular assault rifle developed by Beretta for the Italian Armed Forces as part of the "Soldato Futuro" program, launched in 2008. It features a short-stroke piston system, ambidextrous controls, and a quick-change barrel, with options for 5.56×45mm NATO or 7.62×39mm calibers. Designed to replace the Beretta AR70/90, it includes a companion GLX160 grenade launcher and has been adopted by Italy and tested by various militaries globally.
+        </div>
+    </div>
+
+    
+    <!-- 3D Model Section -->
+    <section class="model-section">
+        
+        <model-viewer 
+            src="./models/sci-fi_bullpup_rifle.glb" 
+            ar 
+            ar-modes="webxr scene-viewer quick-look" 
+            camera-controls 
+            tone-mapping="neutral" 
+            poster="poster.webp" 
+            shadow-intensity="1.84" 
+            exposure="0.51" 
+            shadow-softness="0.85" 
+            camera-orbit="92.05deg 84deg 1.411m" 
+            field-of-view="30deg" 
+            id="arx160-model">
+            <!-- Hotspot for the Scope -->
+            <button class="hotspot" slot="hotspot-1" data-position="0.02712084513577457m 0.16948450491228323m -0.011808572140661305m" data-normal="0.8886909524854497m 0.3160949184760983m -0.33213309603846025m" data-visibility-attribute="visible">
+                <div class="hotspot-annotation">
+                    <h2>Scope</h2>
+                    <p>The scope on the ARX160 in the image is a high-tech optical sight mounted on the top Picatinny rail. The Beretta ARX160 is often equipped with modular optics, such as red dot sights or magnified scopes, depending on the mission. This particular scope appears to be a holographic or red dot sight with a protective cover, possibly an Aimpoint or EOTech-style optic, commonly used for quick target acquisition.</p>
+                </div>
+            </button>
+            <!-- Hotspot for the Nozzle -->
+            <button class="hotspot" slot="hotspot-3" data-position="0.01632832809782517m 0.07925381459604913m 0.3782211117387606m" data-normal="0.9999951682296289m 0.0031086198539928035m -1.6101710826038193e-9m" data-visibility-attribute="visible">
+                <div class="hotspot-annotation">
+                    <h2>Nozzle</h2>
+                    <p>The ARX160 has a suppressor or flash hider attached, which is typical for modern assault rifles to reduce muzzle flash and sound signature.</p>
+                </div>
+            </button>
+            <!-- Hotspot for the Magazine -->
+            <button class="hotspot" slot="hotspot-4" data-position="0.014009360196868402m -0.07192197985238935m -0.05260785795083328m" data-normal="0.999999999169041m -0.00003315929406014229m 0.00002371453621935719m" data-visibility-attribute="visible">
+                <div class="hotspot-annotation">
+                    <h2>Magazine</h2>
+                    <p>The magazine is inserted below the rifle. The ARX160 typically uses STANAG-compatible magazines (e.g., 30-round capacity) but can also be configured for other calibers like 7.62×39mm with different magazines.</p>
+                </div>
+            </button>
+        </model-viewer>
+        <!-- Gun Name Element -->
+        
+    </section>
+
+    <!-- Content Panel (LTA Research Style) -->
+    <div class="content-panel" id="content-panel">
+        <div class="content-panel-header">
+            <div>
+                <div class="feature-label" id="feature-label"></div>
+                <div class="feature-title" id="feature-title"></div>
+            </div>
+        </div>
+        <div class="content-panel-body" id="feature-description"></div>
+        <div class="content-panel-footer">
+            <button onclick="closePanel()">Back to Rifle</button>
+            <button class="next-feature" onclick="showNextFeature()">Next Feature</button>
+        </div>
+    </div>
+
+    <!-- AR Button -->
+    
+
+    <!-- Include model-viewer script -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
+    <script>
+        const modelViewer = document.querySelector('#arx160-model');
+        const contentPanel = document.getElementById('content-panel');
+        const featureLabel = document.getElementById('feature-label');
+        const featureTitle = document.getElementById('feature-title');
+        const featureDescription = document.getElementById('feature-description');
+        const hotspots = document.querySelectorAll('.hotspot');
+        const gunName = document.getElementById('gun-name');
+
+        let currentHotspotIndex = 0;
+
+        // Function to animate camera to hotspot position
+        function zoomToHotspot(position) {
+            const [x, y, z] = position.split('m').map(n => parseFloat(n.trim()));
+            modelViewer.cameraTarget = `${x}m ${y}m ${z}m`;
+            const currentOrbit = modelViewer.getCameraOrbit();
+            const theta = currentOrbit.theta;
+            const phi = currentOrbit.phi;
+            const newDistance = 0.5;
+            modelViewer.cameraOrbit = `${theta}rad ${phi}rad ${newDistance}m`;
+            modelViewer.interpolationDecay = 500; // Smooth transition
+        }
+
+        // Function to show content in the panel
+        function showContent(index) {
+            const hotspot = hotspots[index];
+            const annotation = hotspot.querySelector('.hotspot-annotation');
+            featureLabel.textContent = `FEATURE NO. 0${index + 1}`;
+            featureTitle.textContent = annotation.querySelector('h2').textContent;
+            featureDescription.textContent = annotation.querySelector('p').textContent;
+            contentPanel.classList.add('active');
+            currentHotspotIndex = index;
+            zoomToHotspot(hotspot.getAttribute('data-position'));
+        }
+
+        // Function to close the panel
+        window.closePanel = function() {
+            contentPanel.classList.remove('active');
+            modelViewer.cameraOrbit = '92.05deg 84deg 1.411m';
+            modelViewer.cameraTarget = 'auto auto auto';
+        };
+
+        // Function to show the next feature
+        window.showNextFeature = function() {
+            currentHotspotIndex = (currentHotspotIndex + 1) % hotspots.length;
+            showContent(currentHotspotIndex);
+        };
+
+        // Add click event listeners to each hotspot
+        hotspots.forEach((hotspot, index) => {
+            hotspot.addEventListener('click', () => {
+                showContent(index);
+            });
+        });
+
+        // AR Mode Activation
+        function activateAR() {
+            if (modelViewer.canActivateAR) {
+                modelViewer.activateAR();
+            } else {
+                alert('AR is not available on this device or browser. Please use a compatible device with WebXR support.');
+            }
+        }
+
+        // Interactive Gun Name
+        gunName.addEventListener('click', () => {
+            // Optional: Add an animation or action on click
+            gunName.style.transition = 'transform 0.5s ease';
+            gunName.style.transform = 'translateX(-50%) rotate(360deg)';
+            setTimeout(() => {
+                gunName.style.transform = 'translateX(-50%) scale(1)';
+            }, 500);
+        });
+
+        // Debugging: Log model loading status
+        modelViewer.addEventListener('load', () => {
+            console.log('Model loaded successfully');
+        });
+        modelViewer.addEventListener('error', (event) => {
+            console.error('Error loading model:', event);
+        });
+    </script>
+</body>
+</html>
